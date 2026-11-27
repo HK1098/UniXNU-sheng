@@ -142,6 +142,19 @@ jobs:
             UniXNU/out/sheng/macos-27.3-26C5035r/sheng_macos/tree/.cache/xnu-work
             UniXNU/out/sheng/macos-27.3-26C5035r/sheng_macos/tree/.cache/fakeroot
             UniXNU/out/sheng/macos-27.3-26C5035r/sheng_macos/tree/build/xnu
+      - name: Pin locked FreeBSD Wi-Fi source
+        run: |
+          source_dir=device/drivers/Ath12kWifi/deps/freebsd
+          locked=95719d8a895bf8170851e9844d9b4092b1d2b6fe
+          if [ ! -d "$source_dir/.git" ]; then
+            mkdir -p "$source_dir"
+            git -C "$source_dir" init -q
+            git -C "$source_dir" remote add origin https://github.com/freebsd/freebsd-src.git
+          fi
+          git -C "$source_dir" sparse-checkout init --cone
+          git -C "$source_dir" fetch --depth 1 --filter=blob:none origin "$locked"
+          git -C "$source_dir" checkout --detach "$locked"
+          test "$(git -C "$source_dir" rev-parse HEAD)" = "$locked"
       - name: Prepare installation
         working-directory: UniXNU
         run: |
